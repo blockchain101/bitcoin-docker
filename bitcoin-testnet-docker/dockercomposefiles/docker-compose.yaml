@@ -1,0 +1,27 @@
+bitcoin-testnet:
+  container_name: bitcoin-testnet 
+  hostname: bitcoin-testnet
+  image: blockchain101/bitcoin-testnet
+  volumes:
+    - ~/bitcoindata:/bitcoindata
+  ports:
+    - "19001:19001"
+    - "19011:19011"
+    - "19021:19021"
+    - "19031:19031"
+  #command: bash
+  command: sh -c "rm -rf /bitcoindata/* && cp -R ./init-network/bitcoindata/* /bitcoindata; make start; sleep 5; tail -f /bitcoindata/00/regtest/debug.log" 
+  #command: sh -c "[ ! -d /bitcoindata/00 ] && rm -rf /bitcoindata/* && cp -R ./init-network/bitcoindata/* /bitcoindata; make start; sleep 5; tail -f /bitcoindata/00/regtest/debug.log" 
+  #command: sh -c "make start; sleep 5; tail -f /bitcoindata/00/regtest/debug.log" 
+  stdin_open: true
+  tty: true
+  
+bitcoin-testnet-client:
+  container_name: bitcoin-testnet-client
+  hostname: bitcoin-testnet-client
+  image: blockchain101/bitcoin-testnet-client
+  command: bash
+  stdin_open: true
+  tty: true
+  links:
+    - bitcoin-testnet

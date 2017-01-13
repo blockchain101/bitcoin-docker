@@ -1,0 +1,49 @@
+# bitcoin-testnet-client docker image
+
+# Ubuntu 16.04 LTS (xenial)
+FROM ubuntu:16.04
+MAINTAINER Peng Zhuang <zhuangpeng0514@sina.com>
+
+# install nodejs, npm, make, gcc, g++, unzip, openssl, libssl-dev, iputils-ping(for ping), net-tools(for netstat)
+RUN apt-get update
+RUN apt-get install --yes nodejs
+RUN apt-get update
+RUN apt-get install --yes npm
+RUN apt-get install --yes make
+RUN apt-get install --yes gcc
+RUN apt-get install --yes g++
+RUN apt-get install --yes unzip
+RUN apt-get install --yes openssl libssl-dev
+RUN apt-get install --yes iputils-ping net-tools
+
+# copy the bitcoin-testnet-client resource files into the image
+ADD bitcoin-testnet-client.tar /bitcoin-testnet-client
+
+# a tool for ECC secp256k1 private key(256bytes)/uncompressed public key(65bytes)/RIPEMD160(SHA256(public key 65bytes))=20bytes pubkey/WIF(wallet import format) wallet address 17bytes generation with 'vanity' prefix
+ADD vanitygen-master.zip /bitcoin-testnet-client
+ADD pcre-8.39.zip /bitcoin-testnet-client
+WORKDIR /bitcoin-testnet-client
+RUN unzip pcre-8.39.zip && unzip vanitygen-master.zip && mv pattern.c vanitygen-master
+WORKDIR /bitcoin-testnet-client/pcre-8.39
+RUN ./configure && make && make install && ldconfig
+WORKDIR /bitcoin-testnet-client/vanitygen-master
+RUN make && cp -p vanitygen ../
+
+# change to work directory
+WORKDIR /bitcoin-testnet-client
+RUN ./vanitygen -T m
+
+# install node rpc modules
+RUN npm install kapitalize
+RUN ln -s /usr/bin/nodejs /usr/bin/node
+
+# clean files
+RUN rm -rf vanitygen-master.zip pcre-8.39.zip pcre-8.39 vanitygen-master
+
+
+
+
+
+
+
+
